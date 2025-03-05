@@ -1,0 +1,22 @@
+jenkins:
+  enabled: true
+  controller:
+    jenkinsUrl: https://jenkins.dusktify.com/
+    jenkinsUrlProtocol: https
+    # installPlugins:
+    # - git: 5.2.1
+    resources:
+      limits:
+        cpu: "1024m"
+        memory: "1024Mi"
+      requests:
+        cpu: "512m"
+        memory: "512Mi"
+  agent:
+    resources:
+      limits:
+        cpu: "512m"
+        memory: "512Mi"
+      requests:
+        cpu: "512m"
+        memory: "512Mi"

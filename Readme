@@ -1,0 +1,117 @@
+# Jenkins Helm Chart
+
+> A ready-to-use Jenkins Helm chart for Kubernetes demonstration. Created for CBTW SE sharing session to showcase DevOps best practices with Jenkins on Kubernetes.
+
+This Helm chart deploys Jenkins on Kubernetes using the official Jenkins Helm chart as a dependency.
+
+## Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.2.0+
+- PV provisioner support in the underlying infrastructure
+- Ingress controller installed in the cluster
+
+## Installation
+
+```bash
+# Access chart folder
+cd charts/jenkins
+
+# Create namespace 
+kubectl create ns jenkins
+
+# Update your Helm repositories
+helm dep up
+
+# Install the chart
+helm install jenkins -n jenkins .
+
+# Update your domain and add ingress if needed
+kubectl apply -f jenkins-ingress.yaml -n jenkins
+```
+
+## Configuration
+
+### values.yaml
+
+The chart is configured through the `values.yaml` file. Key configurations include:
+
+- Jenkins controller resources (CPU and memory)
+- Jenkins agent resources
+- Jenkins URL configuration
+
+### Ingress Configuration
+
+The chart includes an Ingress resource configured in `jenkins-ingress.yaml` that:
+- Exposes Jenkins at `jenkins.dusktify.com`
+- Uses TLS with Let's Encrypt certificates
+- Routes traffic to the Jenkins service on port 8080
+
+## Customization
+
+To customize the Jenkins installation:
+
+1. Modify the `values.yaml` file to adjust resource limits, plugins, or other Jenkins configurations
+2. Update the `jenkins-ingress.yaml` file if you need to change the hostname or ingress configuration
+3. Apply your changes with:
+
+```bash
+cd charts/jenkins
+helm upgrade jenkins -n jenkins .
+```
+
+## Accessing Jenkins
+
+Once deployed, Jenkins will be available at:
+- URL: https://jenkins.dusktify.com
+
+### Getting Admin Credentials
+
+To retrieve the Jenkins admin username and password:
+
+```bash
+# Get the Jenkins admin username
+kubectl exec --namespace jenkins -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-username
+
+# Get the Jenkins admin password
+kubectl exec --namespace jenkins -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password
+```
+
+Alternatively, you can retrieve the password from the Kubernetes secret:
+
+```bash
+kubectl get secret --namespace jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode
+kubectl get secret --namespace jenkins jenkins -o jsonpath="{.data.jenkins-admin-user}" | base64 --decode
+```
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the Jenkins pod status:
+   ```bash
+   kubectl get pods -l app.kubernetes.io/name=jenkins -n jenkins
+   ```
+
+2. View Jenkins logs:
+   ```bash
+   kubectl logs -l app.kubernetes.io/name=jenkins -n jenkins
+   ```
+
+3. Verify the ingress is properly configured:
+   ```bash
+   kubectl get ingress jenkins-ingress -n jenkins
+   ```
+
+## Uninstallation
+
+To remove the Jenkins deployment:
+
+```bash
+helm uninstall jenkins -n jenkins
+```
+
+## Additional Resources
+
+- [Official Jenkins Helm Chart Documentation](https://github.com/jenkinsci/helm-charts)
+- [Jenkins Documentation](https://www.jenkins.io/doc/)
