@@ -3,8 +3,6 @@ jenkins:
   controller:
     jenkinsUrl: https://jenkins.dusktify.com/
     jenkinsUrlProtocol: https
-    # installPlugins:
-    # - git: 5.2.1
     resources:
       limits:
         cpu: "1024m"

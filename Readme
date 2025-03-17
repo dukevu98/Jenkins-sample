@@ -23,8 +23,11 @@ kubectl create ns jenkins
 # Update your Helm repositories
 helm dep up
 
-# Install the chart
+# Install the chart with default configuration (no plugins)
 helm install jenkins -n jenkins .
+
+# OR install with plugins using the provided valuesWithPlugins.yaml
+helm install jenkins -n jenkins -f valuesWithPlugins.yaml .
 
 # Update your domain and add ingress if needed
 kubectl apply -f jenkins-ingress.yaml -n jenkins
@@ -40,6 +43,19 @@ The chart is configured through the `values.yaml` file. Key configurations inclu
 - Jenkins agent resources
 - Jenkins URL configuration
 
+### Plugin Configuration
+
+The default `values.yaml` file does not include any plugins to keep it clean. For plugin configuration:
+
+1. See `plugins-list.md` for a comprehensive list of recommended plugins
+2. Use `valuesWithPlugins.yaml` as a starting point for your plugin configuration
+3. Create your own custom values file with plugins from the list
+
+```bash
+# Example: Merge the default values with plugin configuration
+helm install jenkins -n jenkins -f values.yaml -f valuesWithPlugins.yaml .
+```
+
 ### Ingress Configuration
 
 The chart includes an Ingress resource configured in `jenkins-ingress.yaml` that:
@@ -51,7 +67,7 @@ The chart includes an Ingress resource configured in `jenkins-ingress.yaml` that
 
 To customize the Jenkins installation:
 
-1. Modify the `values.yaml` file to adjust resource limits, plugins, or other Jenkins configurations
+1. Modify the `values.yaml` file to adjust resource limits or other Jenkins configurations
 2. Update the `jenkins-ingress.yaml` file if you need to change the hostname or ingress configuration
 3. Apply your changes with:
 
@@ -111,7 +127,30 @@ To remove the Jenkins deployment:
 helm uninstall jenkins -n jenkins
 ```
 
+## Persistent Volume Claims
+
+### Jenkins Node PVC
+
+The chart includes a Persistent Volume Claim for Jenkins nodes (`jenkins-node.pvc.yaml`).
+
+#### How to Use:
+1. Apply this PVC to your cluster:
+   ```bash
+   cd charts/jenins
+   kubectl apply -f jenkins-node.pvc.yaml -n jenkins
+   ```
+2. Reference this PVC in your Jenkins agent pod template using the name 'jenkins-node-pvc'
+
+#### How to Remove:
+1. Delete any pods using this PVC
+2. Delete the PVC:
+   ```bash
+   kubectl delete pvc jenkins-node-pvc -n jenkins
+   ```
+
+**Note:** Deleting this PVC will delete all data stored on it. Make sure to backup any important data.
+
 ## Additional Resources
 
 - [Official Jenkins Helm Chart Documentation](https://github.com/jenkinsci/helm-charts)
-- [Jenkins Documentation](https://www.jenkins.io/doc/)
+- [Jenkins Documentation](https://www.jenkins.io/doc/) 
